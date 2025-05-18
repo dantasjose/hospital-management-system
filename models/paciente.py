@@ -25,7 +25,7 @@ class Paciente:
         novo_id = ultimo_id + 1
         with open(self.arquivo_id, 'w') as f:
             f.write(str(novo_id))
-        return novo_id
+        return str(novo_id)
 
     def cadastrar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -46,8 +46,8 @@ class Paciente:
 
 
         novo_id = self.gerar_novo_id()
-        novo_paciente = pd.DataFrame([[novo_id, nome, cpf, idade, sexo]], 
-                                    columns=['id', 'nome', 'cpf', 'idade', 'sexo'])
+        novo_paciente = pd.DataFrame([[str(novo_id), str(nome), str(cpf), str(idade), str(sexo)]], 
+                                    columns=['id', 'nome', 'cpf', 'idade', 'sexo'], dtype=str)
         
         # Adiciona ao arquivo existente
         novo_paciente.to_csv(self.arquivo_csv, mode='a', header=False, index=False)
@@ -56,7 +56,7 @@ class Paciente:
         
 
     def listar(self):
-        df = pd.read_csv(self.arquivo_csv)
+        df = pd.read_csv(self.arquivo_csv, dtype={'id': str})
         
         if df.empty:
             print('Nenhum paciente cadastrado.')
@@ -74,19 +74,37 @@ class Paciente:
             return
 
         self.listar()
-        id_excluir = input('Digite o ID do paciente que deseja excluir: ').strip()
+        id_excluir = input('Digite o ID do paciente que deseja excluir: ').strip()    
+        df['id'] = df['id'].astype(str)  # Converter para string para evitar problemas de type
+
+
+        if id_excluir not in df['id'].values:
+            print('ID não encontrado')
+            return
         
-        # Converter para string para evitar problemas de tipo
-        df['id'] = df['id'].astype(str)
-        
-        tamanho_inicial = len(df)
         df = df[df['id'] != id_excluir]
-        
-        if len(df) < tamanho_inicial:
-            df.to_csv(self.arquivo_csv, index=False)
-            print(f'Paciente com ID {id_excluir} removido com sucesso')
-        else:
-            print('ID não encontrado.')
+        df.to_csv(self.arquivo_csv, index=False)
+        print(f'Paciente com ID {id_excluir} removido com sucesso.')
+        self.excluir_registros_relacionados(id_excluir)
+
+    def excluir_registros_relacionados(sel, id_paciente):
+        caminho_consulta = 'dados/consulta.csv'
+        if os.path.exists(caminho_consulta):
+            df = pd.read_csv(caminho_consulta, dtype={'id_paciente': str})
+
+            if 'id_paciente' not in df.columns:
+                print('A coluna "id_paciente" não existe no arquivo de consultas.')
+                return
+
+            df['id_paciente'] = df['id_paciente'].astype(str)
+            id_paciente = str(id_paciente)
+
+            original = len(df)
+            df = df[df['id_paciente'] != id_paciente ]
+            df.to_csv(caminho_consulta, index=False)
+            removidos = original - len(df)
+            if removidos > 0 :
+                print(f'{removidos} consulta relacionada ao paciente ID {id_paciente} foram excluídas. ')
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
