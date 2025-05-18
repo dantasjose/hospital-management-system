@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from tabulate import tabulate
 
 class Paciente:
     def __init__(self):
@@ -27,17 +28,22 @@ class Paciente:
         return novo_id
 
     def cadastrar(self):
+        df = pd.read_csv(self.arquivo_csv)
         nome = input('Informe nome e sobrenome do paciente: ')
+        cpf = input('Informe o cpf (somente números): ')
 
-        while True:
-            cpf = input('Informe o cpf (somente números): ')
-            if len(cpf) != 11 or not cpf.isdigit():
+        if cpf in df['cpf'].astype(str).values:
+            print('CPF já cadastrado!')
+            return
+
+        while len(cpf) != 11 or not cpf.isdigit():
                 print('CPF inválido! Deve conter exatamento 11 dígitos numéricos.')
-            else:
-                break
+                cpf = input('Informe novamente o CPF (somente números): ')
+           
 
         idade = input('Informe a idade: ')
         sexo = input('Informe o sexo: ')
+
 
         novo_id = self.gerar_novo_id()
         novo_paciente = pd.DataFrame([[novo_id, nome, cpf, idade, sexo]], 
@@ -46,6 +52,8 @@ class Paciente:
         # Adiciona ao arquivo existente
         novo_paciente.to_csv(self.arquivo_csv, mode='a', header=False, index=False)
         print(f'Paciente cadastrado com sucesso! ID: {novo_id}')
+        print (tabulate(novo_paciente, headers='keys', tablefmt='grid', showindex=False))
+        
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -54,8 +62,9 @@ class Paciente:
             print('Nenhum paciente cadastrado.')
         else:
             print('\nLista de Pacientes:')
-            for _, row in df.iterrows():
-                print(f"ID: {row['id']}, Nome: {row['nome']}, CPF: {row['cpf']}")
+            df_formatado = df[['id', 'nome', 'cpf', 'idade']]
+            print (tabulate(df_formatado, headers='keys', tablefmt='grid', showindex=False))
+             
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
