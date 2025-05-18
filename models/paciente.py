@@ -1,15 +1,17 @@
-import pandas as pd
 import os
 from tabulate import tabulate
+import pandas as pd
+from utils.configs import Configuracoes
 
 class Paciente:
     def __init__(self):
-        self.arquivo_csv = 'dados/paciente.csv'
-        self.arquivo_id = 'dados/ultimo_id.paciente.txt'
+        self.__configurations = Configuracoes()
+        self.arquivo_csv = self.__configurations.file_pacientes
+        self.arquivo_id  = self.__configurations.file_ult_id_paciente
         
         # Criar arquivo CSV se não existir
         if not os.path.exists(self.arquivo_csv):
-            df = pd.DataFrame(columns=['id', 'nome', 'cpf', 'idade', 'sexo'])
+            df = pd.DataFrame(columns=['id', 'nome', 'cpf', 'data_nasc', 'sexo'])
             df.to_csv(self.arquivo_csv, index=False)
         
         # Criar arquivo de ID se não existir ou estiver vazio
@@ -40,20 +42,17 @@ class Paciente:
                 print('CPF inválido! Deve conter exatamento 11 dígitos numéricos.')
                 cpf = input('Informe novamente o CPF (somente números): ')
            
-
-        idade = input('Informe a idade: ')
+        data_nasc = input('Informe a data de nascimento: ')
         sexo = input('Informe o sexo: ')
 
-
         novo_id = self.gerar_novo_id()
-        novo_paciente = pd.DataFrame([[str(novo_id), str(nome), str(cpf), str(idade), str(sexo)]], 
-                                    columns=['id', 'nome', 'cpf', 'idade', 'sexo'], dtype=str)
+        novo_paciente = pd.DataFrame([[str(novo_id), str(nome), str(cpf), str(data_nasc), str(sexo)]], 
+                                    columns=['id', 'nome', 'cpf', 'data_nasc', 'sexo'], dtype=str)
         
         # Adiciona ao arquivo existente
         novo_paciente.to_csv(self.arquivo_csv, mode='a', header=False, index=False)
         print(f'Paciente cadastrado com sucesso! ID: {novo_id}')
-        print (tabulate(novo_paciente, headers='keys', tablefmt='grid', showindex=False))
-        
+        print(tabulate(novo_paciente, headers='keys', tablefmt='grid', showindex=False))
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv, dtype={'id': str})
@@ -62,9 +61,8 @@ class Paciente:
             print('Nenhum paciente cadastrado.')
         else:
             print('\nLista de Pacientes:')
-            df_formatado = df[['id', 'nome', 'cpf', 'idade']]
-            print (tabulate(df_formatado, headers='keys', tablefmt='grid', showindex=False))
-             
+            df_formatado = df[['id', 'nome', 'cpf', 'data_nasc']]
+            print(tabulate(df_formatado, headers='keys', tablefmt='grid', showindex=False))
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -77,7 +75,6 @@ class Paciente:
         id_excluir = input('Digite o ID do paciente que deseja excluir: ').strip()    
         df['id'] = df['id'].astype(str)  # Converter para string para evitar problemas de type
 
-
         if id_excluir not in df['id'].values:
             print('ID não encontrado')
             return
@@ -87,7 +84,7 @@ class Paciente:
         print(f'Paciente com ID {id_excluir} removido com sucesso.')
         self.excluir_registros_relacionados(id_excluir)
 
-    def excluir_registros_relacionados(sel, id_paciente):
+    def excluir_registros_relacionados(self, id_paciente):
         caminho_consulta = 'dados/consulta.csv'
         if os.path.exists(caminho_consulta):
             df = pd.read_csv(caminho_consulta, dtype={'id_paciente': str})
@@ -100,11 +97,11 @@ class Paciente:
             id_paciente = str(id_paciente)
 
             original = len(df)
-            df = df[df['id_paciente'] != id_paciente ]
+            df = df[df['id_paciente'] != id_paciente]
             df.to_csv(caminho_consulta, index=False)
             removidos = original - len(df)
-            if removidos > 0 :
-                print(f'{removidos} consulta relacionada ao paciente ID {id_paciente} foram excluídas. ')
+            if removidos > 0:
+                print(f'{removidos} consulta(s) relacionada(s) ao paciente ID {id_paciente} foram excluída(s).')
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -112,7 +109,6 @@ class Paciente:
         if df.empty:
             print('Nenhum paciente cadastrado para editar.')
             return
-
        
         id_editar = input('Digite o ID do paciente que deseja editar: ').strip()
         
@@ -127,7 +123,7 @@ class Paciente:
         print("\nDados atuais do paciente:")
         print(f"1. Nome: {paciente['nome']}")
         print(f"2. CPF: {paciente['cpf']}")
-        print(f"3. Idade: {paciente['idade']}")
+        print(f"3. Data de Nascimento: {paciente['data_nasc']}")
         print(f"4. Sexo: {paciente['sexo']}")
         
         campo = input("\nDigite o número do campo que deseja editar (1-4): ")
@@ -138,7 +134,7 @@ class Paciente:
         elif campo == '2':
             df.loc[df['id'] == id_editar, 'cpf'] = novo_valor
         elif campo == '3':
-            df.loc[df['id'] == id_editar, 'idade'] = novo_valor
+            df.loc[df['id'] == id_editar, 'data_nasc'] = novo_valor
         elif campo == '4':
             df.loc[df['id'] == id_editar, 'sexo'] = novo_valor
         else:

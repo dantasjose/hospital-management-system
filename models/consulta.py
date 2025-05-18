@@ -1,16 +1,17 @@
-import pandas as pd
 import os
+import pandas as pd
+from utils.configs import Configuracoes
 from datetime import datetime
 
 class Consulta:
     def __init__(self):
-        self.arquivo = 'dados/consulta.csv'
-        self.arquivo_id = 'dados/ultimo_id_consulta.txt'
-        os.makedirs('dados', exist_ok=True)
+        self.__configurations = Configuracoes()
+        self.arquivo_csv = self.__configurations.file_consultas
+        self.arquivo_id  = self.__configurations.file_ult_id_consulta
 
-        if not os.path.exists(self.arquivo) or os.path.getsize(self.arquivo) == 0:
+        if not os.path.exists(self.arquivo_csv) or os.path.getsize(self.arquivo_csv) == 0:
             df = pd.DataFrame(columns=['id', 'paciente', 'data', 'medico'])
-            df.to_csv(self.arquivo, index=False)
+            df.to_csv(self.arquivo_csv, index=False)
 
         if not os.path.exists(self.arquivo_id):
             with open(self.arquivo_id, 'w') as f:
@@ -32,6 +33,7 @@ class Consulta:
         return novo_id
 
     def cadastrar(self):
+        novo_id = self.gerar_novo_id()
         paciente = input('Nome do paciente: ')
         
         data = input('Data da consulta (dd/mm/aaaa): ')
@@ -40,7 +42,6 @@ class Consulta:
             data = input('Data da consulta (dd/mm/aaaa): ')
         
         medico = input('Nome do médico: ')
-        novo_id = self.gerar_novo_id()
 
         nova_linha = pd.DataFrame([{
             'id': novo_id,
@@ -49,21 +50,25 @@ class Consulta:
             'medico': medico
         }])
 
-        df = pd.read_csv(self.arquivo)
+        df = pd.read_csv(self.arquivo_csv)
         df = pd.concat([df, nova_linha], ignore_index=True)
-        df.to_csv(self.arquivo, index=False)
+        df.to_csv(self.arquivo_csv, index=False)
         print(f'Consulta cadastrada com sucesso! ID: {novo_id}')
 
     def listar(self):
-        df = pd.read_csv(self.arquivo)
+        df = pd.read_csv(self.arquivo_csv)
+
         if df.empty:
             print('Nenhuma consulta cadastrada.')
         else:
-            df = df.sort_values(by='id')
-            print(df[['id', 'paciente', 'data', 'medico']].to_string(index=False))
+            #df = df.sort_values(by='id')
+            #print(df[['id', 'paciente', 'data', 'medico']].to_string(index=False))
+            print('\nLista de Consultas:')
+            for index, row in df.iterrows():
+                print(f"ID: {row['id']}, Paciente: {row['paciente']}, Data: {row['data']}, Medico: {row['medico']}")
 
     def editar(self):
-        df = pd.read_csv(self.arquivo)
+        df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhuma consulta para editar.")
             return
@@ -90,11 +95,11 @@ class Consulta:
         novo_medico = input(f"Novo nome do médico (Enter para manter '{linha['medico']}'): ") or linha['medico']
 
         df.loc[df['id'] == id_editar, ['paciente', 'data', 'medico']] = [novo_paciente, nova_data, novo_medico]
-        df.to_csv(self.arquivo, index=False)
+        df.to_csv(self.arquivo_csv, index=False)
         print("Consulta atualizada com sucesso.")
 
     def excluir(self):
-        df = pd.read_csv(self.arquivo)
+        df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhuma consulta para excluir.")
             return
@@ -116,5 +121,5 @@ class Consulta:
             return
 
         df = df[df['id'] != id_excluir]
-        df.to_csv(self.arquivo, index=False)
+        df.to_csv(self.arquivo_csv, index=False)
         print(f"Consulta com ID {id_excluir} excluída com sucesso.")

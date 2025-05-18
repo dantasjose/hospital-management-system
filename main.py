@@ -1,9 +1,14 @@
-import os
-from utils.inicializar_arquivos import salvar_paciente
+
 from models.paciente import Paciente
 from models.consulta import Consulta
+from models.procedimento import Procedimento
 
 class Initialize():
+
+    def __init__(self):
+        self.pacientes = Paciente()
+        self.cons = Consulta()
+        self.proc = Procedimento()
 
     def show_menu(self): 
         print('\n')
@@ -21,7 +26,7 @@ class Initialize():
     def choose_option(self):
         option = input('\nEscolha uma das opções: ')
 
-        if option != '1' and option != '2' and option != '3' and option != '4':
+        if option != '1' and option != '2' and option != '3' and option != '4' and option != '5':
             print('\nOpção inválida!')
 
         return option
@@ -54,51 +59,56 @@ class Initialize():
 
         return sub_option
 
+    def to_sub_menu(self, option, sub_option):
+
+        if option == '1':
+            if sub_option == '1':
+                self.pacientes.cadastrar()
+            elif sub_option == '2':
+                self.pacientes.editar()
+            elif sub_option == '3':
+                self.pacientes.listar()  # se existir
+            elif sub_option == '4':
+                self.pacientes.excluir()
+        elif option == '2':
+            if sub_option == '1':
+                self.cons.cadastrar()
+            elif sub_option == '2':
+                self.cons.editar()
+            elif sub_option == '3':
+                self.cons.listar()       # se existir
+            elif sub_option == '4':
+                self.cons.excluir()
+        elif option == '3':
+            if sub_option == '1':
+                self.proc.cadastrar()
+            elif sub_option == '2':
+                self.proc.editar()
+            elif sub_option == '3':
+                self.proc.listar()       # se existir
+            elif sub_option == '4':
+                self.proc.excluir()
+        elif option == '4':
+            pass
+
     def to_go_out(self):
         print('\nObrigado, volte sempre!')
 
 if __name__ == "__main__":
     init = Initialize()
-option = ''
-pacientes = Paciente()
-cons = Consulta()
+    option = ''
 
-while option != '5':
-    init.show_menu()
-    option = init.choose_option()
+    while option != '5':
+        init.show_menu()
+        option = init.choose_option()
 
-    if option == '1':  # Pacientes
-        sub_option = ''
-        while sub_option != '5':
-            init.show_sub_menu(option)
-            sub_option = init.choose_sub_option()
+        if option in ('1','2','3','4'):  
+            sub_option = ''
+            
+            while sub_option != '5':
+                init.show_sub_menu(option)
+                sub_option = init.choose_sub_option()
+                init.to_sub_menu(option, sub_option)
 
-            if sub_option == '1':
-                pacientes.cadastrar()
-            elif sub_option == '2':
-                pacientes.editar()
-            elif sub_option == '3':
-                pacientes.listar()  # se existir
-            elif sub_option == '4':
-                pacientes.excluir()
-
-    elif option == '2':  # Consultas
-        sub_option = ''
-        while sub_option != '5':
-            init.show_sub_menu(option)
-            sub_option = init.choose_sub_option()
-
-            if sub_option == '1':
-                cons.cadastrar()
-            elif sub_option == '2':
-                cons.editar()
-            elif sub_option == '3':
-                cons.listar()
-            elif sub_option == '4':
-                cons.excluir()
-
-    elif option == '3':  # Procedimentos (futuro)
-        pass
-
-    elif option == '4':
-        init.to_go_out()
+        elif option == '5':
+            init.to_go_out()
