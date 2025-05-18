@@ -27,10 +27,17 @@ class Paciente:
         return novo_id
 
     def cadastrar(self):
-        nome = input('Nome do paciente: ')
-        cpf = input('CPF do paciente: ')
-        idade = input('Idade: ')
-        sexo = input('Sexo: ')
+        nome = input('Informe nome e sobrenome do paciente: ')
+
+        while True:
+            cpf = input('Informe o cpf (somente números): ')
+            if len(cpf) != 11 or not cpf.isdigit():
+                print('CPF inválido! Deve conter exatamento 11 dígitos numéricos.')
+            else:
+                break
+
+        idade = input('Informe a idade: ')
+        sexo = input('Informe o sexo: ')
 
         novo_id = self.gerar_novo_id()
         novo_paciente = pd.DataFrame([[novo_id, nome, cpf, idade, sexo]], 
