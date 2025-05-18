@@ -21,7 +21,7 @@ class Initialize():
     def choose_option(self):
         option = input('\nEscolha uma das opções: ')
 
-        if option != '1' and option != '2' and option != '3' and option != '4':
+        if option != '1' and option != '2' and option != '3' and option != '4' and option != '5':
             print('\nOpção inválida!')
 
         return option
@@ -40,11 +40,11 @@ class Initialize():
 
         print(50 * '-')
 
-        print('1 - Cadatrar')
+        print('1 - Cadastrar')
         print('2 - Editar')
         print('3 - Listar')
         print('4 - Excluir') 
-        print('5 - Voltar') 
+        print('5 - Voltar menu principal') 
 
     def choose_sub_option(self):
         sub_option = input('\nEscolha uma das opções: ')
