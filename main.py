@@ -44,7 +44,7 @@ class Initialize():
 
         print(50 * '-')
 
-        print('1 - Cadatrar')
+        print('1 - Cadastrar')
         print('2 - Editar')
         print('3 - Listar')
         print('4 - Excluir') 
