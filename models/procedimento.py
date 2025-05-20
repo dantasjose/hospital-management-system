@@ -7,9 +7,10 @@ from datetime import datetime
 class Procedimento:
     def __init__(self):
         self.__configurations = Configuracoes()
+        self.paciente_service = Paciente()
         self.arquivo_csv = self.__configurations.file_procedimentos
         self.arquivo_id  = self.__configurations.file_ult_id_procedimento
-        self.paciente = Paciente()
+        
 
         if not os.path.exists(self.arquivo_csv) or os.path.getsize(self.arquivo_csv) == 0:
             df = pd.DataFrame(columns=['id', 'id_paciente', 'data', 'procedimento'])
@@ -35,11 +36,13 @@ class Procedimento:
         return novo_id
 
     def cadastrar(self):
-        cpf = input('CPF do paciente: ')
-        
-        id_paciente = self.paciente.buscar(cpf)
+        cpf = input("Digite o CPF do paciente: ")
+        id_paciente = self.paciente_service.buscar(cpf) # Chama o método buscar na instância de Paciente
         if id_paciente == 0:
-            return
+            print("Paciente não encontrado. Por favor, cadastre o paciente antes de agendar um procedimento.")
+            return # Encerra a função cadastrar
+        else:
+            print(f"Paciente com ID: {id_paciente} Procedendo com o cadastro de procedimento.")
 
         data = input('Data do procedimento (dd/mm/aaaa): ')
         while not self.validar_data(data):
@@ -96,7 +99,7 @@ class Procedimento:
             print("Formato de data inválido. Tente novamente.")
             nova_data = input(f"Nova data (Enter para manter '{linha['data']}'): ") or linha['data']
 
-        novo_procedimento = input(f"Novo nome do médico (Enter para manter '{linha['procedimento']}'): ") or linha['procedimento']
+        novo_procedimento = input(f"Novoprocedimento(Enter para manter '{linha['procedimento']}'): ") or linha['procedimento']
 
         df.loc[df['id'] == id_editar, ['data', 'procedimento']] = [nova_data, novo_procedimento]
         df.to_csv(self.arquivo_csv, index=False)

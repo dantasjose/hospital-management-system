@@ -1,2 +1,2 @@
-id,id_paciente,data,medico
-1,1,20/05/2025,jorge
+id,id_paciente,data,especialidade,medico
+3,6,20/05/2025,Ortopedia,Ortopedia

@@ -7,11 +7,12 @@ from datetime import datetime
 class Consulta:
     def __init__(self):
         self.__configurations = Configuracoes()
+        self.paciente_service = Paciente()
         self.arquivo_csv = self.__configurations.file_consultas
         self.arquivo_id  = self.__configurations.file_ult_id_consulta
 
         if not os.path.exists(self.arquivo_csv) or os.path.getsize(self.arquivo_csv) == 0:
-            df = pd.DataFrame(columns=['id', 'id_paciente', 'data', 'medico'])
+            df = pd.DataFrame(columns=['id', 'id_paciente', 'data', 'especialidade'])
             df.to_csv(self.arquivo_csv, index=False)
 
         if not os.path.exists(self.arquivo_id):
@@ -34,32 +35,34 @@ class Consulta:
         return novo_id
 
     def cadastrar(self):
-        cpf = input('CPF do paciente: ')
-        
-        id_paciente = self.paciente.buscar(cpf)
+        cpf = input("Digite o CPF do paciente: ")
+        id_paciente = self.paciente_service.buscar(cpf) # Chama o método buscar na instância de Paciente
         if id_paciente == 0:
-            return
-        
-        data = input('Data da consulta (dd/mm/aaaa): ')
-        while not self.validar_data(data):
-            print("Formato inválido. Tente novamente.")
+            print("Paciente não encontrado. Por favor, cadastre o paciente antes de agendar uma consulta.")
+            return # Encerra a função cadastrar
+        else:
+            print(f"Paciente com ID: {id_paciente} Procedendo com o cadastro da consulta.")
+
             data = input('Data da consulta (dd/mm/aaaa): ')
-        
-        medico = input('Nome do médico: ')
+            while not self.validar_data(data):
+                print("Formato inválido. Tente novamente.")
+                data = input('Data da consulta (dd/mm/aaaa): ')
 
-        novo_id = self.gerar_novo_id()
+            especialidade = input('Digite a especialidade: ')
 
-        nova_linha = pd.DataFrame([{
-            'id': novo_id,
-            'id_paciente': paciente,
-            'data': data,
-            'medico': medico
-        }])
+            novo_id = self.gerar_novo_id()
 
-        df = pd.read_csv(self.arquivo_csv)
-        df = pd.concat([df, nova_linha], ignore_index=True)
-        df.to_csv(self.arquivo_csv, index=False)
-        print(f'Consulta cadastrada com sucesso! ID: {novo_id}')
+            nova_linha = pd.DataFrame([{
+                'id': novo_id,
+                'id_paciente': id_paciente,
+                'data': data,
+                'especialidade': especialidade,
+            }])
+
+            df = pd.read_csv(self.arquivo_csv)
+            df = pd.concat([df, nova_linha], ignore_index=True)
+            df.to_csv(self.arquivo_csv, index=False)
+            print(f'Consulta cadastrada com sucesso! ID: {novo_id}')
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -71,7 +74,7 @@ class Consulta:
             #print(df[['id', 'paciente', 'data', 'medico']].to_string(index=False))
             print('\nLista de Consultas:')
             for index, row in df.iterrows():
-                print(f"ID: {row['id']}, Paciente: {row['id_paciente']}, Data: {row['data']}, Medico: {row['medico']}")
+                print(f"ID: {row['id']}, Paciente: {row['id_paciente']}, Data: {row['data']}, Especialidade: {row['especialidade']}")
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -97,9 +100,9 @@ class Consulta:
             print("Formato de data inválido. Tente novamente.")
             nova_data = input(f"Nova data (Enter para manter '{linha['data']}'): ") or linha['data']
 
-        novo_medico = input(f"Novo nome do médico (Enter para manter '{linha['medico']}'): ") or linha['medico']
+        nova_especialidade = input(f"Nova especialidade (Enter para manter '{linha['especialidade']}'): ") or linha['especialidade']
 
-        df.loc[df['id'] == id_editar, ['data', 'medico']] = [nova_data, novo_medico]
+        df.loc[df['id'] == id_editar, ['data', 'especialidade']] = [nova_data, nova_especialidade]
         df.to_csv(self.arquivo_csv, index=False)
         print("Consulta atualizada com sucesso.")
 

@@ -1,4 +1,3 @@
-
 from models.paciente import Paciente
 from models.consulta import Consulta
 from models.procedimento import Procedimento
@@ -112,4 +111,3 @@ if __name__ == "__main__":
 
         elif option == '5':
             init.to_go_out()
-
