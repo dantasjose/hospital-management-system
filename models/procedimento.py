@@ -3,6 +3,7 @@ import pandas as pd
 from utils.configs import Configuracoes
 from models.paciente import Paciente
 from datetime import datetime
+from utils.log import registrar_log  # LINHA ADICIONADA
 
 class Procedimento:
     def __init__(self):
@@ -11,7 +12,6 @@ class Procedimento:
         self.arquivo_csv = self.__configurations.file_procedimentos
         self.arquivo_id  = self.__configurations.file_ult_id_procedimento
         
-
         if not os.path.exists(self.arquivo_csv) or os.path.getsize(self.arquivo_csv) == 0:
             df = pd.DataFrame(columns=['id', 'id_paciente', 'data', 'procedimento'])
             df.to_csv(self.arquivo_csv, index=False)
@@ -37,10 +37,10 @@ class Procedimento:
 
     def cadastrar(self):
         cpf = input("Digite o CPF do paciente: ")
-        id_paciente = self.paciente_service.buscar(cpf) # Chama o método buscar na instância de Paciente
+        id_paciente = self.paciente_service.buscar(cpf)
         if id_paciente == 0:
             print("Paciente não encontrado. Por favor, cadastre o paciente antes de agendar um procedimento.")
-            return # Encerra a função cadastrar
+            return
         else:
             print(f"Paciente com ID: {id_paciente} Procedendo com o cadastro de procedimento.")
 
@@ -64,14 +64,15 @@ class Procedimento:
         df = pd.concat([df, nova_linha], ignore_index=True)
         df.to_csv(self.arquivo_csv, index=False)
         print(f'Procedimento cadastrado com sucesso! ID: {novo_id}')
+        
+        # LINHA ADICIONADA
+        registrar_log("Procedimento", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print('Nenhum procedimento cadastrado.')
         else:
-            #df = df.sort_values(by='id')
-            #print(df[['id', 'paciente', 'data', 'procedimento']].to_string(index=False))
             for index, row in df.iterrows():
                 print(f"ID: {row['id']}, ID do Paciente: {row['id_paciente']}, Data: {row['data']}, Procedimento: {row['procedimento']}")
 
@@ -104,6 +105,9 @@ class Procedimento:
         df.loc[df['id'] == id_editar, ['data', 'procedimento']] = [nova_data, novo_procedimento]
         df.to_csv(self.arquivo_csv, index=False)
         print("Procedimento atualizado com sucesso.")
+        
+        # LINHA ADICIONADA
+        registrar_log("Procedimento", "Edição", f"ID: {id_editar}")
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -130,3 +134,6 @@ class Procedimento:
         df = df[df['id'] != id_excluir]
         df.to_csv(self.arquivo_csv, index=False)
         print(f"Procedimento com ID {id_excluir} excluído com sucesso.")
+        
+        # LINHA ADICIONADA
+        registrar_log("Procedimento", "Exclusão", f"ID: {id_excluir}")

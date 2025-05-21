@@ -3,6 +3,7 @@ import pandas as pd
 from utils.configs import Configuracoes
 from models.paciente import Paciente
 from datetime import datetime
+from utils.log import registrar_log  # LINHA ADICIONADA
 
 class Consulta:
     def __init__(self):
@@ -36,10 +37,10 @@ class Consulta:
 
     def cadastrar(self):
         cpf = input("Digite o CPF do paciente: ")
-        id_paciente = self.paciente_service.buscar(cpf) # Chama o método buscar na instância de Paciente
+        id_paciente = self.paciente_service.buscar(cpf)
         if id_paciente == 0:
             print("Paciente não encontrado. Por favor, cadastre o paciente antes de agendar uma consulta.")
-            return # Encerra a função cadastrar
+            return
         else:
             print(f"Paciente com ID: {id_paciente} Procedendo com o cadastro da consulta.")
 
@@ -63,6 +64,9 @@ class Consulta:
             df = pd.concat([df, nova_linha], ignore_index=True)
             df.to_csv(self.arquivo_csv, index=False)
             print(f'Consulta cadastrada com sucesso! ID: {novo_id}')
+            
+            # LINHA ADICIONADA
+            registrar_log("Consulta", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -70,8 +74,6 @@ class Consulta:
         if df.empty:
             print('Nenhuma consulta cadastrada.')
         else:
-            #df = df.sort_values(by='id')
-            #print(df[['id', 'paciente', 'data', 'medico']].to_string(index=False))
             print('\nLista de Consultas:')
             for index, row in df.iterrows():
                 print(f"ID: {row['id']}, Paciente: {row['id_paciente']}, Data: {row['data']}, Especialidade: {row['especialidade']}")
@@ -105,6 +107,9 @@ class Consulta:
         df.loc[df['id'] == id_editar, ['data', 'especialidade']] = [nova_data, nova_especialidade]
         df.to_csv(self.arquivo_csv, index=False)
         print("Consulta atualizada com sucesso.")
+        
+        # LINHA ADICIONADA
+        registrar_log("Consulta", "Edição", f"ID: {id_editar}")
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -131,3 +136,6 @@ class Consulta:
         df = df[df['id'] != id_excluir]
         df.to_csv(self.arquivo_csv, index=False)
         print(f"Consulta com ID {id_excluir} excluída com sucesso.")
+        
+        # LINHA ADICIONADA
+        registrar_log("Consulta", "Exclusão", f"ID: {id_excluir}")

@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from tabulate import tabulate
 from utils.configs import Configuracoes
+from utils.log import registrar_log  # LINHA ADICIONADA
 
 class Paciente:
     def __init__(self,arquivo_csv="pacientes.csv"):
@@ -43,20 +44,19 @@ class Paciente:
                 print('CPF inválido! Deve conter exatamento 11 dígitos numéricos.')
                 cpf = input('Informe novamente o CPF (somente números): ')
            
-
         idade = input('Informe  data de nascimento (dd/mm/aaaa): ')
         sexo = input('Informe o sexo: ')
-
 
         novo_id = self.gerar_novo_id()
         novo_paciente = pd.DataFrame([[novo_id, nome, cpf, idade, sexo]], 
                                     columns=['id', 'nome', 'cpf', 'data_nascimento', 'sexo'])
         
-        # Adiciona ao arquivo existente
         novo_paciente.to_csv(self.arquivo_csv, mode='a', header=False, index=False)
         print(f'Paciente cadastrado com sucesso! ID: {novo_id}')
         print(tabulate(novo_paciente, headers='keys', tablefmt='grid', showindex=False))
        
+        # LINHA ADICIONADA
+        registrar_log("Paciente", "Cadastro", f"Nome: {nome}, CPF: {cpf}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -79,7 +79,6 @@ class Paciente:
 
         cpf_excluir = input('Digite o CPF do paciente que deseja excluir: ').strip()
         
-        # Converter para string para evitar problemas de tipo
         df['cpf'] = df['cpf'].astype(str)
         
         if cpf_excluir not in df['cpf'].values:
@@ -100,25 +99,16 @@ class Paciente:
                 print ('Acão cancelada.')
                 return
             
-            ###Excluir consultas
             df_consultas = df_consultas[df_consultas['id_paciente'] != id_paciente]
             df_consultas.to_csv(consulta_service.arquivo_csv, index=False)
             print('Consulas associadas ao paciente foram excluidas')
 
-        ###Excluir paciente
         df = df[df['cpf'] != cpf_excluir]
         df.to_csv(self.arquivo_csv, index=False)
         print('Paciente com CPF {cpf_excluir} removido com sucesso. ')
-
-       
-        ###tamanho_inicial = len(df)
-        ###df = df[df['cpf'] != cpf_excluir]
         
-        ###if len(df) < tamanho_inicial:
-        ###    df.to_csv(self.arquivo_csv, index=False)
-       ###     print(f'Paciente com CPF {cpf_excluir} removido com sucesso')
-        ###else:
-       ###     print('CPF não encontrado.')
+        # LINHA ADICIONADA
+        registrar_log("Paciente", "Exclusão", f"CPF: {cpf_excluir}")
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -129,7 +119,6 @@ class Paciente:
        
         cpf_editar = input('Digite o CPF do paciente que deseja editar: ').strip()
         
-        # Converter para string para evitar problemas de tipo
         df['cpf'] = df['cpf'].astype(str)
         
         if cpf_editar not in df['cpf'].values:
@@ -160,6 +149,9 @@ class Paciente:
             
         df.to_csv(self.arquivo_csv, index=False)
         print("Paciente atualizado com sucesso!")
+        
+        # LINHA ADICIONADA
+        registrar_log("Paciente", "Edição", f"CPF: {cpf_editar}, Campo: {campo}")
 
     def buscar(self, cpf):
          df = pd.read_csv(self.arquivo_csv)
