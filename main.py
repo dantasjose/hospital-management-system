@@ -1,14 +1,14 @@
+from utils.log import Logs 
 from models.paciente import Paciente
 from models.consulta import Consulta
 from models.procedimento import Procedimento
-import sys
-import time
 
 class Initialize():
     def __init__(self):
         self.pacientes = Paciente()
         self.cons = Consulta()
         self.proc = Procedimento()
+        self.logs = Logs();
 
     def show_menu(self): 
         print('\n')
@@ -50,21 +50,7 @@ class Initialize():
         return sub_option
 
     def handle_logs(self):
-        """Método específico para tratar a exibição de logs"""
-        try:
-            sys.stdout.flush()
-            time.sleep(0.1)
-            
-            with open("dados/log.txt", "r", encoding="utf-8") as arquivo:
-                conteudo = arquivo.read()
-                print("\n" + 50 * '-')
-                print("REGISTROS DE LOG".center(50))
-                print(50 * '-')
-                print(conteudo if conteudo else "Nenhum registro encontrado")
-                print(50 * '-')
-        except FileNotFoundError:
-            print("\nNenhum registro de log encontrado.")
-        input("\nPressione Enter para voltar...")
+        self.logs.handle_logs();
 
     def to_sub_menu(self, option, sub_option):
         if option == '1':
@@ -106,18 +92,16 @@ if __name__ == "__main__":
         init.show_menu()
         option = init.choose_option()
 
-        if option == '4':
-            init.handle_logs()  # Chama o método específico para logs
-            continue
-            
         if option in ('1','2','3'):  
             sub_option = ''
+            
             while sub_option != '5':
                 init.show_sub_menu(option)
                 sub_option = init.choose_sub_option()
-                if sub_option == '5':
-                    break
                 init.to_sub_menu(option, sub_option)
 
+        elif option == '4':
+            init.handle_logs()  # Chama o método específico para logs
+            
         elif option == '5':
             init.to_go_out()

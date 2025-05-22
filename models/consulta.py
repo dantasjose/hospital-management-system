@@ -1,14 +1,17 @@
 import os
 import pandas as pd
-from utils.configs import Configuracoes
-from models.paciente import Paciente
+
 from datetime import datetime
-from utils.log import registrar_log  # LINHA ADICIONADA
+from tabulate import tabulate
+from utils.configs import Configuracoes
+from utils.log import Logs 
+from models.paciente import Paciente
 
 class Consulta:
     def __init__(self):
         self.__configurations = Configuracoes()
         self.paciente_service = Paciente()
+        self.logs = Logs();
         self.arquivo_csv = self.__configurations.file_consultas
         self.arquivo_id  = self.__configurations.file_ult_id_consulta
 
@@ -64,27 +67,29 @@ class Consulta:
             df = pd.concat([df, nova_linha], ignore_index=True)
             df.to_csv(self.arquivo_csv, index=False)
             print(f'Consulta cadastrada com sucesso! ID: {novo_id}')
+            print("\nResumo da consulta cadastrada:")
+            print(tabulate(nova_linha, headers='keys', tablefmt='fancy_grid', showindex=False))
             
             # LINHA ADICIONADA
-            registrar_log("Consulta", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
+            self.logs.registrar_log("Consulta", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
 
         if df.empty:
             print('Nenhuma consulta cadastrada.')
-        else:
-            print('\nLista de Consultas:')
-            for index, row in df.iterrows():
-                print(f"ID: {row['id']}, Paciente: {row['id_paciente']}, Data: {row['data']}, Especialidade: {row['especialidade']}")
+            return
+        print("\nLista de Consultas:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhuma consulta para editar.")
             return
-
-        print(df.to_string(index=False))
+        print("\nConsultas cadastradas:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid'))
+        
         try:
             id_editar = int(input("Digite o ID da consulta que deseja editar: "))
         except ValueError:
@@ -107,9 +112,12 @@ class Consulta:
         df.loc[df['id'] == id_editar, ['data', 'especialidade']] = [nova_data, nova_especialidade]
         df.to_csv(self.arquivo_csv, index=False)
         print("Consulta atualizada com sucesso.")
+        linha_atualizada = df [df['id'] == id_editar]
+        print("\nConsulta Após edição:")
+        print(tabulate(linha_atualizada, headers='keys', tablefmt='fancy_grid'))
         
         # LINHA ADICIONADA
-        registrar_log("Consulta", "Edição", f"ID: {id_editar}")
+        self.logs.registrar_log("Consulta", "Edição", f"ID: {id_editar}")
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -117,7 +125,9 @@ class Consulta:
             print("Nenhuma consulta para excluir.")
             return
 
-        print(df.to_string(index=False))
+        print("\nConsultas cadastradas:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid'))
+        
         try:
             id_excluir = int(input("Digite o ID da consulta que deseja excluir: "))
         except ValueError:
@@ -138,4 +148,4 @@ class Consulta:
         print(f"Consulta com ID {id_excluir} excluída com sucesso.")
         
         # LINHA ADICIONADA
-        registrar_log("Consulta", "Exclusão", f"ID: {id_excluir}")
+        self.logs.registrar_log("Consulta", "Exclusão", f"ID: {id_excluir}")

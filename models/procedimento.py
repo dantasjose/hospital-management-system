@@ -1,14 +1,16 @@
 import os
 import pandas as pd
-from utils.configs import Configuracoes
-from models.paciente import Paciente
 from datetime import datetime
-from utils.log import registrar_log  # LINHA ADICIONADA
+from tabulate import tabulate
+from utils.configs import Configuracoes
+from utils.log import Logs 
+from models.paciente import Paciente
 
 class Procedimento:
     def __init__(self):
         self.__configurations = Configuracoes()
         self.paciente_service = Paciente()
+        self.logs = Logs();
         self.arquivo_csv = self.__configurations.file_procedimentos
         self.arquivo_id  = self.__configurations.file_ult_id_procedimento
         
@@ -65,24 +67,28 @@ class Procedimento:
         df.to_csv(self.arquivo_csv, index=False)
         print(f'Procedimento cadastrado com sucesso! ID: {novo_id}')
         
+        print("\nResumo da consulta cadastrada:")
+        print(tabulate(nova_linha, headers='keys', tablefmt='fancy_grid',showindex=False))
+        
         # LINHA ADICIONADA
-        registrar_log("Procedimento", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
+        self.logs.registrar_log("Procedimento", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print('Nenhum procedimento cadastrado.')
-        else:
-            for index, row in df.iterrows():
-                print(f"ID: {row['id']}, ID do Paciente: {row['id_paciente']}, Data: {row['data']}, Procedimento: {row['procedimento']}")
+            return
+        print("\nLista de Consultas:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhum procedimento para editar.")
             return
-
-        print(df.to_string(index=False))
+        print("\nConsultas cadastradas:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
+        
         try:
             id_editar = int(input("Digite o ID do procedimento que deseja editar: "))
         except ValueError:
@@ -107,7 +113,7 @@ class Procedimento:
         print("Procedimento atualizado com sucesso.")
         
         # LINHA ADICIONADA
-        registrar_log("Procedimento", "Edição", f"ID: {id_editar}")
+        self.logs.registrar_log("Procedimento", "Edição", f"ID: {id_editar}")
 
     def excluir(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -136,4 +142,4 @@ class Procedimento:
         print(f"Procedimento com ID {id_excluir} excluído com sucesso.")
         
         # LINHA ADICIONADA
-        registrar_log("Procedimento", "Exclusão", f"ID: {id_excluir}")
+        self.logs.registrar_log("Procedimento", "Exclusão", f"ID: {id_excluir}")
