@@ -67,26 +67,32 @@ class Procedimento:
         df.to_csv(self.arquivo_csv, index=False)
         print(f'Procedimento cadastrado com sucesso! ID: {novo_id}')
         
-        print("\nResumo da consulta cadastrada:")
+        print("\nResumo do procedimento cadastrado:")
         print(tabulate(nova_linha, headers='keys', tablefmt='fancy_grid',showindex=False))
         
         # LINHA ADICIONADA
-        self.logs.registrar_log("Procedimento", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
+        self.logs.registrar_log("Procedimento", "Cadastro", f"CPF: {cpf}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print('Nenhum procedimento cadastrado.')
             return
-        print("\nLista de Consultas:")
-        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
+        print("\nLista de Procedimentos:")
+        #print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
 
+        df_pacientes = pd.read_csv(self.paciente_service.arquivo_csv)
+        df_join = pd.merge(df, df_pacientes, how="inner", left_on="id_paciente", right_on="id", suffixes=("_procedimento", "_lista_pacientes"))
+        #print(df_join.columns)
+        print(tabulate(df_join[["id_procedimento", "cpf", "data", "procedimento"]], headers='keys', tablefmt='fancy_grid', showindex=False))
+     
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhum procedimento para editar.")
             return
-        print("\nConsultas cadastradas:")
+        
+        print("\nProcedimentos cadastrados:")
         print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
         
         try:
@@ -121,7 +127,9 @@ class Procedimento:
             print("Nenhum procedimento para excluir.")
             return
 
-        print(df.to_string(index=False))
+        print("\nProcedimentos cadastrados:")
+        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
+
         try:
             id_excluir = int(input("Digite o ID do procedimento que deseja excluir: "))
         except ValueError:

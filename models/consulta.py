@@ -71,7 +71,7 @@ class Consulta:
             print(tabulate(nova_linha, headers='keys', tablefmt='fancy_grid', showindex=False))
             
             # LINHA ADICIONADA
-            self.logs.registrar_log("Consulta", "Cadastro", f"ID: {novo_id}, Paciente: {id_paciente}")
+            self.logs.registrar_log("Consulta", "Cadastro", f"CPF: {cpf}")
 
     def listar(self):
         df = pd.read_csv(self.arquivo_csv)
@@ -80,13 +80,19 @@ class Consulta:
             print('Nenhuma consulta cadastrada.')
             return
         print("\nLista de Consultas:")
-        print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
+        #print(tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False))
+
+        df_pacientes = pd.read_csv(self.paciente_service.arquivo_csv)
+        df_join = pd.merge(df, df_pacientes, how="inner", left_on="id_paciente", right_on="id", suffixes=("_consulta", "_lista_consultas"))
+        #print(df_join.columns)
+        print(tabulate(df_join[["id_consulta", "cpf", "data", "especialidade"]], headers='keys', tablefmt='fancy_grid', showindex=False))
 
     def editar(self):
         df = pd.read_csv(self.arquivo_csv)
         if df.empty:
             print("Nenhuma consulta para editar.")
             return
+        
         print("\nConsultas cadastradas:")
         print(tabulate(df, headers='keys', tablefmt='fancy_grid'))
         
