@@ -5,10 +5,11 @@ class Database:
     def __init__(self):
         try:
             self.conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="sua_senha",
-                database="hospital"
+            host="localhost",
+            port=3306,
+            user="root",
+            password="Dantas@9293",
+            database="hospital"
             )
             self.cursor = self.conn.cursor(dictionary=True)
             print("✅ Conectado ao MySQL com sucesso!")
