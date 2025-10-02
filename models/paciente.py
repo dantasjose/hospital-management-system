@@ -1,11 +1,9 @@
-import os
-import pandas as pd
 
-from datetime import datetime
-from tabulate import tabulate
-from utils.configs import Configuracoes
-from utils.log import Logs 
 from utils.db import Database
+from tabulate import tabulate
+from datetime import datetime
+
+
 class Paciente:
     def __init__(self):
         self.db = Database()
@@ -19,9 +17,21 @@ class Paciente:
             print("⚠️ CPF já cadastrado!")
             return
 
-        data_nasc = input("Informe data de nascimento (AAAA-MM-DD): ")
-        sexo = input("Informe o sexo (M/F): ")
+          # Validação da data
+        while True:
+            data_nasc = input("Informe data de nascimento (YYYY-MM-DD): ")
+            try:
+                datetime.strptime(data_nasc, "%Y-%m-%d")
+                break
+            except ValueError:
+                print("⚠️ Data inválida! Use o formato YYYY-MM-DD.")
 
+        sexo = input("Informe o sexo (M/F): ").upper()
+        while sexo not in ("M", "F"):
+            print("⚠️ Sexo inválido. Digite apenas M ou F.")
+            sexo = input("Informe o sexo (M/F): ").upper()
+
+        # Inserir no banco
         self.db.execute(
             "INSERT INTO pacientes (nome, cpf, data_nasc, sexo) VALUES (%s, %s, %s, %s)",
             (nome, cpf, data_nasc, sexo)
