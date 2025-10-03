@@ -42,9 +42,6 @@ hospital-management-system/
 ├── README.md # Documentação do projeto
 └── requirements.txt # Dependências do Python
 
-yaml
-Copiar código
-
 ---
 
 ## 🛠️ Tecnologias Utilizadas
