@@ -52,5 +52,10 @@ jobs:
           mysql -h 127.0.0.1 -uroot -proot hospital < database.sql
 
       - name: Run tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: root
+          DB_NAME: hospital
         run: pytest -v
-

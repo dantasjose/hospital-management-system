@@ -1,15 +1,16 @@
 import mysql.connector
 from mysql.connector import Error
+import os
 
 class Database:
     def __init__(self):
         try:
             self.conn = mysql.connector.connect(
-            host="localhost",
-            port=3306,
-            user="root",
-            password="Dantas@9293",
-            database="hospital"
+                host=os.getenv("DB_HOST", "localhost"),
+                port=int(os.getenv("DB_PORT", 3306)),
+                user=os.getenv("DB_USER", "root"),
+                password=os.getenv("DB_PASSWORD", "Dantas@9293"),
+                database=os.getenv("DB_NAME", "hospital")
             )
             self.cursor = self.conn.cursor(dictionary=True)
             print("✅ Conectado ao MySQL com sucesso!")
@@ -36,4 +37,4 @@ class Database:
             if hasattr(self, "conn") and self.conn and self.conn.is_connected():
                 self.conn.close()
         except:
-         pass  # ignora qualquer erro ao finalizar
+            pass  # ignora qualquer erro ao finalizar
