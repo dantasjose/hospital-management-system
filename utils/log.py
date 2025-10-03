@@ -1,55 +1,35 @@
-import os
-import sys
-import time
-
-from datetime import datetime
-from utils.configs import Configuracoes
+from utils.db import Database
+from tabulate import tabulate
 
 class Logs:
     def __init__(self):
-        self.__configurations = Configuracoes()
-        self.arquivo_logs = self.__configurations.file_logs
+        self.db = Database()
 
-    def registrar_log(self, entidade: str, acao: str, identificador: str) -> None:
-        """
-        Registra ações do sistema em arquivo de log.
-        Formato: [DATA HORA] AÇÃO - ENTIDADE - IDENTIFICADOR
-        """
-        try:
-            data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            linha = f"[{data_hora}] {acao.upper()} - {entidade.upper()} - {identificador}\n"
+    def registrar_log(self, entidade, acao, detalhes=""):
+        """Registra uma ação no banco de dados"""
+        self.db.execute(
+            "INSERT INTO logs (entidade, acao, detalhes) VALUES (%s, %s, %s)",
+            (entidade, acao, detalhes)
+        )
+        print(f"📝 Log registrado: {entidade} - {acao}")
 
-            # Cria o diretório se não existir
-            diretorio = os.path.dirname(self.arquivo_logs)
-            if not os.path.exists(diretorio):
-                os.makedirs(diretorio)
-        
-            # Abre o arquivo forçando a escrita imediata (flush)
-            with open(self.arquivo_logs, "a", encoding="utf-8") as arquivo:
-                arquivo.write(linha)
-                arquivo.flush()  # FORÇA A ESCRITA IMEDIATA
-        except Exception:
-            pass
+    def listar_logs(self, limit=20):
+        """Lista os últimos logs"""
+        logs = self.db.fetchall(
+            "SELECT id, entidade, acao, detalhes, data_hora FROM logs ORDER BY data_hora DESC LIMIT %s",
+            (limit,)
+        )
+        if not logs:
+            print("⚠️ Nenhum log encontrado.")
+            return
+        print("\nÚltimas ações registradas:")
+        print(tabulate(logs, headers="keys", tablefmt="fancy_grid"))
 
-    def handle_logs(self):
-        """Método específico para tratar a exibição de logs"""
-        try:
-            sys.stdout.flush()
-            time.sleep(0.1)
-            
-            print("\n" + 50 * '-')
-            print("REGISTROS DE LOG".center(50))
-            print(50 * '-')
-
-            with open(self.arquivo_logs , "r", encoding="utf-8") as arquivo:
-                conteudo = arquivo.read()
-
-            print(conteudo.strip() if conteudo else "Nenhum registro encontrado")
-            print(50 * '-')
-
-        except FileNotFoundError:
-            print("\nNenhum registro de log encontrado.")
-
-        input("\nPressione Enter para voltar...")
-
-    
+    def limpar_logs(self):
+        """Apaga todos os logs (cuidado!)"""
+        confirmar = input("Tem certeza que deseja apagar todos os logs? (s/n): ").lower()
+        if confirmar == "s":
+            self.db.execute("DELETE FROM logs")
+            print("✅ Todos os logs foram apagados.")
+        else:
+            print("❌ Operação cancelada.")
