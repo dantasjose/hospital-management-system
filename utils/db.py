@@ -30,6 +30,10 @@ class Database:
         return self.cursor.fetchone()
 
     def __del__(self):
-        if self.conn.is_connected():
-            self.cursor.close()
-            self.conn.close()
+        try:
+            if hasattr(self, "cursor") and self.cursor:
+                self.cursor.close()
+            if hasattr(self, "conn") and self.conn and self.conn.is_connected():
+                self.conn.close()
+        except:
+         pass  # ignora qualquer erro ao finalizar
