@@ -1,5 +1,9 @@
 # 🏥 Sistema de Gerenciamento Hospitalar
 
+
+![Run Pytest](https://github.com/dantasjose/hospital-management-system/actions/workflows/tests.yml/badge.svg)
+
+
 Este é um sistema simples de gerenciamento hospitalar, desenvolvido em **Python**, que agora utiliza **MySQL** para armazenamento dos dados.  
 
 O projeto foi inicialmente feito com **arquivos CSV** como parte do projeto final da disciplina de **Algoritmos e Programação em Python** (Pós-Graduação em Ciência de Dados – Facens), e foi evoluído para integrar com banco de dados relacional em um cenário mais próximo de sistemas reais.
