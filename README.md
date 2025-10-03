@@ -20,6 +20,7 @@ O projeto foi inicialmente feito com **arquivos CSV** como parte do projeto fina
 ---
 ---
 ## 🗂️ Estrutura do Projeto
+```
 
 hospital-management-system/
 │
@@ -41,7 +42,8 @@ hospital-management-system/
 ├── main.py # Ponto de entrada do sistema (menu principal)
 ├── README.md # Documentação do projeto
 └── requirements.txt # Dependências do Python
----
+```
+
 ---
 
 ## 🛠️ Tecnologias Utilizadas
