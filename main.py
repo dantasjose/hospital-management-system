@@ -50,7 +50,8 @@ class Initialize():
         return sub_option
 
     def handle_logs(self):
-        self.logs.handle_logs();
+        self.logs.listar_logs()
+
 
     def to_sub_menu(self, option, sub_option):
         if option == '1':
