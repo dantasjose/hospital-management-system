@@ -9,7 +9,7 @@ class Database:
                 host=os.getenv("DB_HOST", "localhost"),
                 port=int(os.getenv("DB_PORT", 3306)),
                 user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD", "Dantas@9293"),
+                password=os.getenv("DB_PASSWORD", "Digite sua senha aqui"),
                 database=os.getenv("DB_NAME", "hospital")
             )
             self.cursor = self.conn.cursor(dictionary=True)
